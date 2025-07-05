@@ -6,7 +6,7 @@ function Login({ onLogin }) {
   const [password, setPassword] = useState('');
   const handleSubmit = async e => {
     e.preventDefault();
-    const res = await fetch('http://localhost:5000/api/login', {
+    const res = await fetch('/api/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -33,7 +33,7 @@ function Gallery() {
   const [photos, setPhotos] = useState([]);
   const [file, setFile] = useState();
   const fetchPhotos = async () => {
-    const res = await fetch('http://localhost:5000/api/photos', { credentials: 'include' });
+    const res = await fetch('/api/photos', { credentials: 'include' });
     if (res.ok) {
       const data = await res.json();
       setPhotos(data);
@@ -44,7 +44,7 @@ function Gallery() {
     e.preventDefault();
     const form = new FormData();
     form.append('photo', file);
-    const res = await fetch('http://localhost:5000/api/upload', {
+    const res = await fetch('/api/upload', {
       method: 'POST',
       credentials: 'include',
       body: form
@@ -60,7 +60,7 @@ function Gallery() {
       <div className="gallery">
         {photos.map(p => (
           <div key={p.id} className="photo">
-            <img src={`http://localhost:5000/uploads/${p.filename}`} alt="" />
+            <img src={`/uploads/${p.filename}`} alt="" />
             <div className="caption">{p.uploader}</div>
           </div>
         ))}
