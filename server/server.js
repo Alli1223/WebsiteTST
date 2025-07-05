@@ -72,4 +72,13 @@ app.get('/api/photos', isLoggedIn, (req, res) => {
 
 app.use('/uploads', express.static(uploadDir));
 
+// Serve the React build if it exists
+const buildPath = path.join(__dirname, '..', 'client', 'build');
+if (fs.existsSync(buildPath)) {
+  app.use(express.static(buildPath));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+}
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
