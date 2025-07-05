@@ -1,6 +1,69 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 
+function DriveManager() {
+  const [info, setInfo] = useState({ sdReader: false, mounts: [] });
+  const [device, setDevice] = useState('');
+  const [mountpoint, setMountpoint] = useState('');
+
+  const refresh = async () => {
+    const res = await fetch('http://localhost:5000/api/drives');
+    if (res.ok) {
+      const data = await res.json();
+      setInfo(data);
+    }
+  };
+
+  const handleMount = async () => {
+    const res = await fetch('http://localhost:5000/api/mount', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ device, mountpoint })
+    });
+    if (res.ok) {
+      setDevice('');
+      setMountpoint('');
+      refresh();
+    } else {
+      alert('Mount failed');
+    }
+  };
+
+  useEffect(() => { refresh(); }, []);
+
+  return (
+    <div className="drive-manager">
+      <button onClick={refresh}>Refresh Drives</button>
+      {info.sdReader && info.mounts.length === 0 && (
+        <div>
+          <p>SD card reader detected but not mounted.</p>
+          <input
+            placeholder="Device path"
+            value={device}
+            onChange={e => setDevice(e.target.value)}
+          />
+          <input
+            placeholder="Mount point"
+            value={mountpoint}
+            onChange={e => setMountpoint(e.target.value)}
+          />
+          <button onClick={handleMount}>Mount</button>
+        </div>
+      )}
+      {info.mounts.length > 0 && (
+        <div>
+          <p>Mounted devices in /media:</p>
+          <ul>
+            {info.mounts.map(m => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Login({ onLogin }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -48,6 +111,7 @@ function Gallery() {
   };
   return (
     <div>
+      <DriveManager />
       <form onSubmit={handleUpload} className="upload">
         <input type="file" onChange={e => setFile(e.target.files[0])} />
         <button type="submit">Upload</button>

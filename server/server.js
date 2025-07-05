@@ -6,6 +6,8 @@ const bcrypt = require('bcrypt');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -67,6 +69,27 @@ app.get('/api/photos', isLoggedIn, (req, res) => {
   db.all('SELECT * FROM photos', [], (err, rows) => {
     if (err) return res.status(500).json({ error: 'DB error' });
     res.json(rows);
+  });
+});
+
+app.get('/api/drives', (req, res) => {
+  exec('lsusb', (err, stdout) => {
+    const sdReader = !err && stdout.includes('05e3:0743');
+    const user = os.userInfo().username;
+    const mediaPath = path.join('/media', user);
+    fs.readdir(mediaPath, { withFileTypes: true }, (e, files) => {
+      const mounts = !e ? files.filter(f => f.isDirectory()).map(f => f.name) : [];
+      res.json({ sdReader, mounts });
+    });
+  });
+});
+
+app.post('/api/mount', (req, res) => {
+  const { device, mountpoint } = req.body;
+  if (!device || !mountpoint) return res.status(400).json({ error: 'Missing data' });
+  exec(`mount ${device} ${mountpoint}`, (err, stdout, stderr) => {
+    if (err) return res.status(500).json({ error: stderr || 'mount failed' });
+    res.json({ success: true, output: stdout });
   });
 });
 
