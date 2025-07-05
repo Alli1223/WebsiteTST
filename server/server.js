@@ -14,7 +14,9 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
 
-const db = new sqlite3.Database(path.join(__dirname, 'database.db'));
+const dbDir = path.join(__dirname, 'database');
+if (!fs.existsSync(dbDir)) fs.mkdirSync(dbDir);
+const db = new sqlite3.Database(path.join(dbDir, 'database.db'));
 
 db.serialize(() => {
   db.run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)');
