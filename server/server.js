@@ -19,6 +19,9 @@ const db = new sqlite3.Database(path.join(__dirname, 'database.db'));
 db.serialize(() => {
   db.run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)');
   db.run('CREATE TABLE IF NOT EXISTS photos (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, uploader TEXT)');
+  // Create default admin user if it doesn't exist
+  const adminHash = bcrypt.hashSync('admin', 10);
+  db.run('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)', ['admin', adminHash]);
 });
 
 const uploadDir = path.join(__dirname, 'uploads');
