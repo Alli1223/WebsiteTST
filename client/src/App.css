@@ -42,3 +42,15 @@ input, button {
   margin-top: 5px;
   color: #2e7d32;
 }
+
+.event-list {
+  list-style: none;
+  padding: 0;
+}
+
+.event-list li {
+  background: #fff;
+  border: 1px solid #2e7d32;
+  margin: 5px;
+  padding: 5px;
+}

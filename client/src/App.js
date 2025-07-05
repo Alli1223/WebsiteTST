@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
 import './App.css';
 
 function Login({ onLogin }) {
@@ -69,12 +71,71 @@ function Gallery() {
   );
 }
 
+function CalendarPage() {
+  const [events, setEvents] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const fetchEvents = async () => {
+    const res = await fetch('/api/events', { credentials: 'include' });
+    if (res.ok) {
+      const data = await res.json();
+      setEvents(data);
+    }
+  };
+
+  useEffect(() => { fetchEvents(); }, []);
+
+  const handleDayClick = async value => {
+    setSelectedDate(value);
+    const desc = prompt('Enter availability description');
+    if (!desc) return;
+    const iso = value.toISOString().split('T')[0];
+    const res = await fetch('/api/events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ date: iso, description: desc })
+    });
+    if (res.ok) fetchEvents();
+  };
+
+  const dateKey = selectedDate.toISOString().split('T')[0];
+  const todays = events.filter(e => e.date === dateKey);
+
+  return (
+    <div>
+      <Calendar onClickDay={handleDayClick} value={selectedDate} onChange={setSelectedDate} />
+      <h3>Events on {dateKey}</h3>
+      <ul className="event-list">
+        {todays.map(e => (
+          <li key={e.id}>{e.description}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function App() {
   const [logged, setLogged] = useState(false);
+  const [view, setView] = useState('gallery');
+  let content;
+  if (!logged) {
+    content = <Login onLogin={() => setLogged(true)} />;
+  } else if (view === 'gallery') {
+    content = <Gallery />;
+  } else {
+    content = <CalendarPage />;
+  }
   return (
     <div className="App">
       <h1>Tree Gallery</h1>
-      {logged ? <Gallery /> : <Login onLogin={() => setLogged(true)} />}
+      {logged && (
+        <div>
+          <button onClick={() => setView('gallery')}>Gallery</button>
+          <button onClick={() => setView('calendar')}>Calendar</button>
+        </div>
+      )}
+      {content}
     </div>
   );
 }

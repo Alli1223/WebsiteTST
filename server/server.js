@@ -25,6 +25,7 @@ const db = new sqlite3.Database(path.join(dbDir, 'database.db'));
 db.serialize(() => {
   db.run('CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE, password TEXT)');
   db.run('CREATE TABLE IF NOT EXISTS photos (id INTEGER PRIMARY KEY AUTOINCREMENT, filename TEXT, uploader TEXT)');
+  db.run('CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, date TEXT, description TEXT)');
   // Create default admin user if it doesn't exist
   const adminHash = bcrypt.hashSync('admin', 10);
   db.run('INSERT OR IGNORE INTO users (username, password) VALUES (?, ?)', ['admin', adminHash]);
@@ -88,6 +89,27 @@ app.get('/api/photos', isLoggedIn, (req, res) => {
     if (err) return res.status(500).json({ error: 'DB error' });
     res.json(rows);
   });
+});
+
+app.get('/api/events', isLoggedIn, (req, res) => {
+  const user = req.session.user;
+  db.all('SELECT * FROM events WHERE user=?', [user], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'DB error' });
+    res.json(rows);
+  });
+});
+
+app.post('/api/events', isLoggedIn, (req, res) => {
+  const user = req.session.user;
+  const { date, description } = req.body;
+  db.run(
+    'INSERT INTO events (user, date, description) VALUES (?, ?, ?)',
+    [user, date, description],
+    function (err) {
+      if (err) return res.status(500).json({ error: 'DB error' });
+      res.json({ id: this.lastID });
+    }
+  );
 });
 
 app.use('/uploads', express.static(uploadDir));

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+jest.mock('react-calendar', () => () => null);
 import App from './App';
 
 test('renders header', () => {
