@@ -76,9 +76,10 @@ app.use('/uploads', express.static(uploadDir));
 const buildPath = path.join(__dirname, '..', 'client', 'build');
 if (fs.existsSync(buildPath)) {
   app.use(express.static(buildPath));
-  // Express 5 uses path-to-regexp@6 which does not support a bare "*" path.
-  // Using "/*" matches any path so the React app can handle client-side routes.
-  app.get('/*', (req, res) => {
+  // Express 5 uses path-to-regexp@6 which requires a name when using a
+  // wildcard. Using "/*path" matches any path so the React app can handle
+  // client-side routes.
+  app.get('/*path', (req, res) => {
     res.sendFile(path.join(buildPath, 'index.html'));
   });
 }
