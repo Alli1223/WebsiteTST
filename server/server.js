@@ -12,6 +12,10 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
 app.use(session({ secret: 'secret', resave: false, saveUninitialized: false }));
 
 const dbDir = path.join(__dirname, 'database');
@@ -50,9 +54,20 @@ app.post('/api/register', async (req, res) => {
 
 app.post('/api/login', (req, res) => {
   const { username, password } = req.body;
+  console.log(`Login attempt for ${username}`);
   db.get('SELECT * FROM users WHERE username=?', [username], async (err, row) => {
-    if (err || !row || !(await bcrypt.compare(password, row.password))) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+    if (err) {
+      console.error('DB error on login', err);
+      return res.status(500).json({ error: 'DB error' });
+    }
+    if (!row) {
+      console.log(`User not found: ${username}`);
+      return res.status(400).json({ error: 'User not found' });
+    }
+    const match = await bcrypt.compare(password, row.password);
+    if (!match) {
+      console.log(`Incorrect password for ${username}`);
+      return res.status(400).json({ error: 'Incorrect password' });
     }
     req.session.user = username;
     res.json({ success: true });

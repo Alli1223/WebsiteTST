@@ -12,7 +12,12 @@ function Login({ onLogin }) {
       credentials: 'include',
       body: JSON.stringify({ username, password })
     });
-    if (res.ok) onLogin(); else alert('Login failed');
+    if (res.ok) {
+      onLogin();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Login failed');
+    }
   };
   return (
     <form className="login" onSubmit={handleSubmit}>
