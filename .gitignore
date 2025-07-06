@@ -1,5 +1,3 @@
-node_modules
-uploads
-server/database
+# Ignore temporary files
 *.log
-*.db
+.DS_Store
