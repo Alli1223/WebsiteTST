@@ -1,3 +1,7 @@
 # Ignore temporary files
 *.log
 .DS_Store
+
+# Node and Angular build output
+node_modules
+dist
