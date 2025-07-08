@@ -1,8 +1,6 @@
-# Website for TST
+# Forest Website
 
-This repository contains a small static website for our gaming group of friends.
-Open `index.html` in a browser to visit the home page or `about.html` to read
-more about us.
+This repository now contains a simple Angular application themed with a green forest look.
 
-No additional setup is required; simply serve these files with any static web
-server or open them directly in your browser.
+Run `make run` from the repository root to install dependencies and start the site. The navigation bar links to Home, Content, Games and About Us pages.
+
